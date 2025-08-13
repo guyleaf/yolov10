@@ -67,7 +67,7 @@ class Tuner:
         ```
     """
 
-    def __init__(self, args=DEFAULT_CFG, _callbacks=None):
+    def __init__(self, cfg=DEFAULT_CFG, args=None, _callbacks=None):
         """
         Initialize the Tuner with configurations.
 
@@ -100,7 +100,7 @@ class Tuner:
             "mixup": (0.0, 1.0),  # image mixup (probability)
             "copy_paste": (0.0, 1.0),  # segment copy-paste (probability)
         }
-        self.args = get_cfg(overrides=args)
+        self.args = get_cfg(cfg, args)
         self.tune_dir = get_save_dir(self.args, name="tune")
         self.tune_csv = self.tune_dir / "tune_results.csv"
         self.callbacks = _callbacks or callbacks.get_default_callbacks()

@@ -8,7 +8,7 @@ import torch
 
 from ultralytics.data import build_dataloader, build_yolo_dataset, converter
 from ultralytics.engine.validator import BaseValidator
-from ultralytics.utils import LOGGER, ops
+from ultralytics.utils import DEFAULT_CFG, LOGGER, ops
 from ultralytics.utils.checks import check_requirements
 from ultralytics.utils.metrics import ConfusionMatrix, DetMetrics, box_iou
 from ultralytics.utils.plotting import output_to_target, plot_images
@@ -28,9 +28,9 @@ class DetectionValidator(BaseValidator):
         ```
     """
 
-    def __init__(self, dataloader=None, save_dir=None, pbar=None, args=None, _callbacks=None):
+    def __init__(self, dataloader=None, save_dir=None, pbar=None, cfg=DEFAULT_CFG, args=None, _callbacks=None):
         """Initialize detection model with necessary variables and settings."""
-        super().__init__(dataloader, save_dir, pbar, args, _callbacks)
+        super().__init__(dataloader, save_dir, pbar, cfg, args, _callbacks)
         self.nt_per_class = None
         self.is_coco = False
         self.class_map = None
@@ -155,7 +155,7 @@ class DetectionValidator(BaseValidator):
             if self.args.save_json:
                 self.pred_to_json(predn, batch["im_file"][si])
             if self.args.save_txt:
-                file = self.save_dir / "labels" / f'{Path(batch["im_file"][si]).stem}.txt'
+                file = self.save_dir / "labels" / f"{Path(batch['im_file'][si]).stem}.txt"
                 self.save_one_txt(predn, self.args.save_conf, pbatch["ori_shape"], file)
 
     def finalize_metrics(self, *args, **kwargs):

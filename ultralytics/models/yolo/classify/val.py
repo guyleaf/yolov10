@@ -4,7 +4,7 @@ import torch
 
 from ultralytics.data import ClassificationDataset, build_dataloader
 from ultralytics.engine.validator import BaseValidator
-from ultralytics.utils import LOGGER
+from ultralytics.utils import DEFAULT_CFG, LOGGER
 from ultralytics.utils.metrics import ClassifyMetrics, ConfusionMatrix
 from ultralytics.utils.plotting import plot_images
 
@@ -26,9 +26,9 @@ class ClassificationValidator(BaseValidator):
         ```
     """
 
-    def __init__(self, dataloader=None, save_dir=None, pbar=None, args=None, _callbacks=None):
+    def __init__(self, dataloader=None, save_dir=None, pbar=None, cfg=DEFAULT_CFG, args=None, _callbacks=None):
         """Initializes ClassificationValidator instance with args, dataloader, save_dir, and progress bar."""
-        super().__init__(dataloader, save_dir, pbar, args, _callbacks)
+        super().__init__(dataloader, save_dir, pbar, cfg, args, _callbacks)
         self.targets = None
         self.pred = None
         self.args.task = "classify"
