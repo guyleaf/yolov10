@@ -14,20 +14,15 @@ from ultralytics.nn.modules import (
     C3,
     C3TR,
     OBB,
-    PSA,
     SPP,
-    SPPELAN,
     SPPF,
-    ADown,
     Bottleneck,
     BottleneckCSP,
     C2f,
     C2fAttn,
-    C2fCIB,
+    ImagePoolingAttn,
     C3Ghost,
     C3x,
-    CBFuse,
-    CBLinear,
     Classify,
     Concat,
     Conv,
@@ -41,29 +36,28 @@ from ultralytics.nn.modules import (
     GhostConv,
     HGBlock,
     HGStem,
-    ImagePoolingAttn,
     Pose,
     RepC3,
     RepConv,
-    RepNCSPELAN4,
-    RepVGGDW,
     ResNetLayer,
     RTDETRDecoder,
-    SCDown,
     Segment,
     WorldDetect,
-    v10Detect,
+    RepNCSPELAN4,
+    ADown,
+    SPPELAN,
+    CBFuse,
+    CBLinear,
+    Silence,
+    C2fCIB,
+    PSA,
+    SCDown,
+    RepVGGDW,
+    v10Detect
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
-from ultralytics.utils.loss import (
-    v8ClassificationLoss,
-    v8DetectionLoss,
-    v8OBBLoss,
-    v8PoseLoss,
-    v8SegmentationLoss,
-    v10DetectLoss,
-)
+from ultralytics.utils.loss import v8ClassificationLoss, v8DetectionLoss, v8OBBLoss, v8PoseLoss, v8SegmentationLoss, v10DetectLoss
 from ultralytics.utils.plotting import feature_visualization
 from ultralytics.utils.torch_utils import (
     fuse_conv_and_bn,
@@ -298,7 +292,7 @@ class DetectionModel(BaseModel):
         if nc and nc != self.yaml["nc"]:
             LOGGER.info(f"Overriding model.yaml nc={self.yaml['nc']} with nc={nc}")
             self.yaml["nc"] = nc  # override YAML value
-        self.model, self.save, self.chs = parse_model(deepcopy(self.yaml), ch=ch, verbose=verbose)  # model, savelist
+        self.model, self.save = parse_model(deepcopy(self.yaml), ch=ch, verbose=verbose)  # model, savelist
         self.names = {i: f"{i}" for i in range(self.yaml["nc"])}  # default names dict
         self.inplace = self.yaml.get("inplace", True)
 
@@ -427,7 +421,7 @@ class ClassificationModel(BaseModel):
             self.yaml["nc"] = nc  # override YAML value
         elif not nc and not self.yaml.get("nc", None):
             raise ValueError("nc not specified. Must specify nc in model.yaml or function arguments.")
-        self.model, self.save, self.chs = parse_model(deepcopy(self.yaml), ch=ch, verbose=verbose)  # model, savelist
+        self.model, self.save = parse_model(deepcopy(self.yaml), ch=ch, verbose=verbose)  # model, savelist
         self.stride = torch.Tensor([1])  # no stride constraints
         self.names = {i: f"{i}" for i in range(self.yaml["nc"])}  # default names dict
         self.info()
@@ -949,7 +943,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
         if i == 0:
             ch = []
         ch.append(c2)
-    return nn.Sequential(*layers), sorted(save), ch
+    return nn.Sequential(*layers), sorted(save)
 
 
 def yaml_model_load(path):
