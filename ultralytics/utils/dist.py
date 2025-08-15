@@ -5,8 +5,10 @@ import shutil
 import socket
 import sys
 import tempfile
+from types import SimpleNamespace
+from typing import Union
 
-from . import USER_CONFIG_DIR
+from . import DEFAULT_CFG_DICT, USER_CONFIG_DIR
 from .torch_utils import TORCH_1_9
 
 
@@ -22,9 +24,12 @@ def find_free_network_port() -> int:
         return s.getsockname()[1]  # port
 
 
-def generate_ddp_file(trainer):
+def generate_ddp_file(trainer, default_cfg: Union[dict, SimpleNamespace] = DEFAULT_CFG_DICT):
     """Generates a DDP file and returns its file name."""
     module, name = f"{trainer.__class__.__module__}.{trainer.__class__.__name__}".rsplit(".", 1)
+    if isinstance(default_cfg, SimpleNamespace):
+        default_cfg = vars(default_cfg)
+    assert isinstance(default_cfg, dict)
 
     content = f"""
 # Ultralytics Multi-GPU training temp file (should be automatically deleted after use)
@@ -32,9 +37,8 @@ overrides = {vars(trainer.args)}
 
 if __name__ == "__main__":
     from {module} import {name}
-    from ultralytics.utils import DEFAULT_CFG_DICT
 
-    cfg = DEFAULT_CFG_DICT.copy()
+    cfg = {default_cfg}
     cfg.update(save_dir='')   # handle the extra key 'save_dir'
     trainer = {name}(cfg=cfg, overrides=overrides)
     results = trainer.train()
