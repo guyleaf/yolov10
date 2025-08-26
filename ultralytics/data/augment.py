@@ -15,6 +15,7 @@ from ultralytics.utils.instance import Instances
 from ultralytics.utils.metrics import bbox_ioa
 from ultralytics.utils.ops import segment2box, xyxyxyxy2xywhr
 from ultralytics.utils.torch_utils import TORCHVISION_0_10, TORCHVISION_0_11, TORCHVISION_0_13
+
 from .utils import polygons2masks, polygons2masks_overlap
 
 DEFAULT_MEAN = (0.0, 0.0, 0.0)
@@ -146,11 +147,11 @@ class Mosaic(BaseMixTransform):
         n (int, optional): The grid size, either 4 (for 2x2) or 9 (for 3x3).
     """
 
-    def __init__(self, dataset, imgsz=640, p=1.0, n=4):
+    def __init__(self, dataset, imgsz=640, p=1.0, n=4, pre_transform=None):
         """Initializes the object with a dataset, image size, probability, and border."""
         assert 0 <= p <= 1.0, f"The probability should be in range [0, 1], but got {p}."
         assert n in (4, 9), "grid must be equal to 4 or 9."
-        super().__init__(dataset=dataset, p=p)
+        super().__init__(dataset=dataset, pre_transform=pre_transform, p=p)
         self.dataset = dataset
         self.imgsz = imgsz
         self.border = (-imgsz // 2, -imgsz // 2)  # width, height
