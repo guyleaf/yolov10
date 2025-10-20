@@ -10,6 +10,7 @@ from functools import partial
 
 import torch
 
+from ultralytics.utils import WEIGHTS_DIR
 from ultralytics.utils.downloads import attempt_download_asset
 from .modules.decoders import MaskDecoder
 from .modules.encoders import ImageEncoderViT, PromptEncoder
@@ -128,7 +129,7 @@ def _build_sam(
         pixel_std=[58.395, 57.12, 57.375],
     )
     if checkpoint is not None:
-        checkpoint = attempt_download_asset(checkpoint)
+        checkpoint = attempt_download_asset(checkpoint, dir=WEIGHTS_DIR)
         with open(checkpoint, "rb") as f:
             state_dict = torch.load(f)
         sam.load_state_dict(state_dict)

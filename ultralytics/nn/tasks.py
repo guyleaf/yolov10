@@ -55,7 +55,7 @@ from ultralytics.nn.modules import (
     RepVGGDW,
     v10Detect
 )
-from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
+from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, WEIGHTS_DIR, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
 from ultralytics.utils.loss import v8ClassificationLoss, v8DetectionLoss, v8OBBLoss, v8PoseLoss, v8SegmentationLoss, v10DetectLoss
 from ultralytics.utils.plotting import feature_visualization
@@ -721,7 +721,7 @@ def torch_safe_load(weight):
     from ultralytics.utils.downloads import attempt_download_asset
 
     check_suffix(file=weight, suffix=".pt")
-    file = attempt_download_asset(weight)  # search online if missing locally
+    file = attempt_download_asset(weight, dir=WEIGHTS_DIR)  # search online if missing locally
     try:
         with temporary_modules(
             {
