@@ -402,7 +402,7 @@ def get_github_assets(repo="ultralytics/assets", version="latest", retry=False):
     return data["tag_name"], [x["name"] for x in data["assets"]]  # tag, assets i.e. ['yolov8n.pt', 'yolov8s.pt', ...]
 
 
-def attempt_download_asset(file, repo="ultralytics/assets", release="v8.1.0", **kwargs):
+def attempt_download_asset(file, repo="ultralytics/assets", release="v8.1.0", dir=None, **kwargs):
     """
     Attempt to download a file from GitHub release assets if it is not found locally. The function checks for the file
     locally first, then tries to download it from the specified GitHub repository release.
@@ -411,6 +411,8 @@ def attempt_download_asset(file, repo="ultralytics/assets", release="v8.1.0", **
         file (str | Path): The filename or file path to be downloaded.
         repo (str, optional): The GitHub repository in the format 'owner/repo'. Defaults to 'ultralytics/assets'.
         release (str, optional): The specific release version to be downloaded. Defaults to 'v8.1.0'.
+        dir (str, optional): The directory to save the downloaded file.
+            If not provided, the file will be saved in the current working directory.
         **kwargs (any): Additional keyword arguments for the download process.
 
     Returns:
@@ -441,19 +443,19 @@ def attempt_download_asset(file, repo="ultralytics/assets", release="v8.1.0", **
             if Path(file).is_file():
                 LOGGER.info(f"Found {clean_url(url)} locally at {file}")  # file already exists
             else:
-                safe_download(url=url, file=file, min_bytes=1e5, **kwargs)
+                safe_download(url=url, file=file, dir=dir, min_bytes=1e5, **kwargs)
 
         elif repo == GITHUB_ASSETS_REPO and name in GITHUB_ASSETS_NAMES:
-            safe_download(url=f"{download_url}/{release}/{name}", file=file, min_bytes=1e5, **kwargs)
+            safe_download(url=f"{download_url}/{release}/{name}", file=file, dir=dir, min_bytes=1e5, **kwargs)
 
         else:
             tag, assets = get_github_assets(repo, release)
             if not assets:
                 tag, assets = get_github_assets(repo)  # latest release
             if name in assets:
-                safe_download(url=f"{download_url}/{tag}/{name}", file=file, min_bytes=1e5, **kwargs)
+                safe_download(url=f"{download_url}/{tag}/{name}", file=file, dir=dir, min_bytes=1e5, **kwargs)
 
-        return str(file)
+        return str(Path(dir or ".") / file)
 
 
 def download(url, dir=Path.cwd(), unzip=True, delete=False, curl=False, threads=1, retry=3, exist_ok=False):
