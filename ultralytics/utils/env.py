@@ -31,7 +31,7 @@ def setup_environment():
         return
     _ENV_SETUP_DONE = True
 
-    custom_module_path = os.environ.get("YOLOV10_ENV_MODULE")
+    custom_module_path = os.environ.get("ULTRALYTICS_ENV_MODULE")
 
     if custom_module_path:
         setup_custom_environment(custom_module_path)
