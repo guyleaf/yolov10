@@ -248,7 +248,7 @@ def find_dataset_yaml(path: Path) -> Path:
     return files[0]
 
 
-def check_det_dataset(dataset, autodownload=True):
+def check_det_dataset(dataset, autodownload=True, resolve_paths=("train", "val", "test")):
     """
     Download, verify, and/or unzip a dataset if not found locally.
 
@@ -259,6 +259,7 @@ def check_det_dataset(dataset, autodownload=True):
     Args:
         dataset (str): Path to the dataset or dataset descriptor (like a YAML file).
         autodownload (bool, optional): Whether to automatically download the dataset if not found. Defaults to True.
+        resolve_paths (list[str], optional): Which keys will be resolved by path.
 
     Returns:
         (dict): Parsed dataset information and paths.
@@ -303,7 +304,7 @@ def check_det_dataset(dataset, autodownload=True):
 
     # Set paths
     data["path"] = path  # download scripts
-    for k in "train", "val", "test":
+    for k in resolve_paths:
         if data.get(k):  # prepend path
             if isinstance(data[k], str):
                 x = (path / data[k]).resolve()
