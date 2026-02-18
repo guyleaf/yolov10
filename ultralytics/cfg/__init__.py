@@ -2,13 +2,14 @@
 
 import contextlib
 import os
+import re
 import shutil
 import subprocess
 import sys
+from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Dict, List, Union
-import re
 
 from ultralytics.utils import (
     ASSETS,
@@ -211,7 +212,7 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
         if "save_dir" not in cfg:
             overrides.pop("save_dir", None)  # special override keys to ignore
         check_dict_alignment(cfg, overrides)
-        cfg = {**cfg, **overrides}  # merge cfg and overrides dicts (prefer overrides)
+        cfg = merge_dict(cfg, overrides)  # merge cfg and overrides dicts (prefer overrides)
 
     # Special handling for numeric project/name
     for k in "project", "name":
@@ -322,6 +323,23 @@ def check_dict_alignment(base: Dict, custom: Dict, e=None):
             match_str = f"Similar arguments are i.e. {matches}." if matches else ""
             string += f"'{colorstr('red', 'bold', x)}' is not a valid YOLO argument. {match_str}\n"
         raise SyntaxError(string + CLI_HELP_MSG) from e
+
+
+def merge_dict(base: Dict, custom: Dict):
+    """
+    This function merges a custom configuration list and a base configuration list recursively.
+
+    Args:
+        base (dict): a dictionary of base configuration options
+        custom (dict): a dictionary of custom configuration options
+    """
+    result = deepcopy(base)
+    for k, v in custom.items():
+        if isinstance(result[k], Dict) and isinstance(v, Dict):
+            result[k] = merge_dict(result[k], v)
+        else:
+            result[k] = v
+    return result
 
 
 def merge_equals_args(args: List[str]) -> List[str]:
