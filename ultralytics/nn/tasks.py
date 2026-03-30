@@ -304,8 +304,11 @@ class DetectionModel(BaseModel):
             forward = lambda x: self.forward(x)[0] if isinstance(m, (Segment, Pose, OBB)) else self.forward(x)
             if isinstance(m, v10Detect):
                 forward = lambda x: self.forward(x)["one2many"]
+            self.model.eval()  # Avoid changing batch statistics until training begins
+            m.training = True  # Setting it to True to properly return strides
             m.stride = torch.tensor([s / x.shape[-2] for x in forward(torch.zeros(1, ch, s, s))])  # forward
             self.stride = m.stride
+            self.model.train()  # Set model back to training(default) mode
             m.bias_init()  # only run once
         else:
             self.stride = torch.Tensor([32])  # default stride for i.e. RTDETR
